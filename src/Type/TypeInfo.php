@@ -8,7 +8,6 @@ use function in_array;
 final class TypeInfo
 {
     public const SCALAR_TYPES = ['int', 'float', 'string', 'bool'];
-
     private string $type;
     private bool $isNullable;
     private ?TypeInfo $innerType;
@@ -52,12 +51,37 @@ final class TypeInfo
 
     public function isArray(): bool
     {
-        return $this->type === 'array';
+        return $this->hasTypeIn('array');
+    }
+
+    public function isMixed(): bool
+    {
+        return $this->hasTypeIn('mixed');;
     }
 
     public function isObject(): bool
     {
         return class_exists($this->type);
+    }
+
+    public function isString(): bool
+    {
+        return $this->hasTypeIn('string');
+    }
+
+    public function isInteger(): bool
+    {
+        return $this->hasTypeIn('integer', 'int');
+    }
+
+    public function isFloat(): bool
+    {
+        return $this->hasTypeIn('float');
+    }
+
+    public function isBoolean(): bool
+    {
+        return $this->hasTypeIn('bool', 'boolean');
     }
 
     public function isNullable(): bool
@@ -67,7 +91,7 @@ final class TypeInfo
 
     public function isScalar(): bool
     {
-        return in_array($this->type, self::SCALAR_TYPES);
+        return $this->hasTypeIn(...self::SCALAR_TYPES);
     }
 
     public function isStrict(): bool
@@ -77,8 +101,8 @@ final class TypeInfo
             || $this->isArray() && $this->innerType !== null;
     }
 
-    public function isMixed(): bool
+    private function hasTypeIn(string ...$types): bool
     {
-        return $this->type === 'mixed';
+        return in_array($this->type, $types, true);
     }
 }

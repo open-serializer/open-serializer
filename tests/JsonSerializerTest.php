@@ -9,9 +9,12 @@ use OpenSerializer\JsonSerializer;
 use OpenSerializer\Tests\Stub\ArrayOfArraysOfIntegersTyped;
 use OpenSerializer\Tests\Stub\ArrayOfIntegers;
 use OpenSerializer\Tests\Stub\ArrayOfIntegersTyped;
+use OpenSerializer\Tests\Stub\ArrayOfMixed;
+use OpenSerializer\Tests\Stub\ArrayOfUnknown;
 use OpenSerializer\Tests\Stub\DatesTyped;
 use OpenSerializer\Tests\Stub\IntegersDocs;
 use OpenSerializer\Tests\Stub\IntegersTyped;
+use OpenSerializer\Tests\Stub\ListOfIntegers;
 use OpenSerializer\Tests\Stub\Node;
 use OpenSerializer\Tests\Stub\NodeName;
 use PHPUnit\Framework\TestCase;
@@ -61,7 +64,6 @@ final class JsonSerializerTest extends TestCase
 
     public function test_serialization_of_nested_structures(): void
     {
-        $serializer = new JsonSerializer();
         $tree = new Node(
             new NodeName('root'),
             [
@@ -155,6 +157,17 @@ final class JsonSerializerTest extends TestCase
         );
     }
 
+    public function test_deserialization_of_list_of_integers(): void
+    {
+        self::assertEquals(
+            new ListOfIntegers(123, 321, 213, 231),
+            (new JsonSerializer())->deserialize(
+                ListOfIntegers::class,
+                JsonObject::fromArray(['items' => [123, 321, 213, 231]])
+            )
+        );
+    }
+
     public function test_deserialization_of_array_of_arrays_of_objects(): void
     {
         self::assertEquals(
@@ -192,6 +205,28 @@ final class JsonSerializerTest extends TestCase
                         ],
                     ]
                 )
+            )
+        );
+    }
+
+    public function test_deserialization_of_array_of_mixed_values(): void
+    {
+        self::assertEquals(
+            new ArrayOfMixed(123, 'string', 1.23, ['array']),
+            (new JsonSerializer())->deserialize(
+                ArrayOfMixed::class,
+                JsonObject::fromArray(['items' => [123, 'string', 1.23, ['array']]])
+            )
+        );
+    }
+
+    public function test_deserialization_of_array_of_unspecified_values(): void
+    {
+        self::assertEquals(
+            new ArrayOfUnknown(123, 'string', 1.23, ['array']),
+            (new JsonSerializer())->deserialize(
+                ArrayOfUnknown::class,
+                JsonObject::fromArray(['items' => [123, 'string', 1.23, ['array']]])
             )
         );
     }

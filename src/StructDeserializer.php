@@ -86,8 +86,23 @@ final class StructDeserializer
             return $this->deserializeObject($type->type(), $value);
         }
 
-        if ($type->isScalar()) {
-            // TODO cast to proper scalar type
+        if ($type->isString()) {
+            return (string)$value;
+        }
+
+        if ($type->isInteger()) {
+            return (int)$value;
+        }
+
+        if ($type->isFloat()) {
+            return (float)$value;
+        }
+
+        if ($type->isBoolean()) {
+            return (bool)$value;
+        }
+
+        if ($type->isMixed()) {
             return $value;
         }
 
