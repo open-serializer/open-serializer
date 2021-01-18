@@ -9,6 +9,7 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionProperty;
 use function array_key_exists;
+use function class_exists;
 
 final class StructDeserializer
 {
@@ -53,6 +54,9 @@ final class StructDeserializer
         return $object;
     }
 
+    /**
+     * @param ReflectionClass<object> $class
+     */
     private static function assertUserDefined(ReflectionClass $class): void
     {
         if (!$class->isUserDefined()) {
@@ -60,6 +64,11 @@ final class StructDeserializer
         }
     }
 
+    /**
+     * @param ReflectionClass<object> $class
+     * @param mixed $value
+     * @return mixed
+     */
     private function deserializeProperty(ReflectionClass $class, ReflectionProperty $property, $value)
     {
         $type = $this->typeResolver->resolveType($class, $property);
@@ -67,6 +76,11 @@ final class StructDeserializer
         return $this->deserializeValue($type, $value);
     }
 
+    /**
+     * @param TypeInfo $type
+     * @param mixed $value
+     * @return mixed
+     */
     private function deserializeValue(TypeInfo $type, $value)
     {
         if ($value === null && $type->isNullable()) {
@@ -82,7 +96,7 @@ final class StructDeserializer
             return $items;
         }
 
-        if ($type->isObject()) {
+        if (class_exists($type->type())) {
             return $this->deserializeObject($type->type(), $value);
         }
 

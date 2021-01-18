@@ -33,6 +33,9 @@ final class DocBlockPropertyResolver implements PropertyTypeResolver
         $this->typeResolver = new TypeResolver();
     }
 
+    /**
+     * @param ReflectionClass<object> $class
+     */
     public function resolveType(ReflectionClass $class, ReflectionProperty $property): TypeInfo
     {
         $doc = $property->getDocComment();

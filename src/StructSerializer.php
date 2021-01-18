@@ -34,7 +34,7 @@ final class StructSerializer
 
     /**
      * @param mixed $value
-     * @return array|bool|float|int|string|null
+     * @return array<int|string, mixed>|bool|float|int|string|null
      */
     private function serializeValue($value)
     {
@@ -53,7 +53,10 @@ final class StructSerializer
         throw new LogicException(sprintf('Unsupported type: %s', gettype($value)));
     }
 
-    /** @return array<int|string, mixed> */
+    /**
+     * @param array<int|string, mixed> $value
+     * @return array<int|string, mixed>
+     */
     private function serializeArray(array $value): array
     {
         $items = [];
@@ -64,6 +67,9 @@ final class StructSerializer
         return $items;
     }
 
+    /**
+     * @param ReflectionClass<object> $class
+     */
     private static function assertUserDefined(ReflectionClass $class): void
     {
         if (!$class->isUserDefined()) {

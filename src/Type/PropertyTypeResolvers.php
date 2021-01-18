@@ -20,6 +20,9 @@ final class PropertyTypeResolvers implements PropertyTypeResolver
         return new self(new TypedPropertyResolver(), new DocBlockPropertyResolver());
     }
 
+    /**
+     * @param ReflectionClass<object> $class
+     */
     public function resolveType(ReflectionClass $class, ReflectionProperty $property): TypeInfo
     {
         $type = TypeInfo::ofMixed();

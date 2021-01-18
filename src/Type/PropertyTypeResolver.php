@@ -7,5 +7,8 @@ use ReflectionProperty;
 
 interface PropertyTypeResolver
 {
+    /**
+     * @param ReflectionClass<object> $class
+     */
     public function resolveType(ReflectionClass $class, ReflectionProperty $property): TypeInfo;
 }

@@ -8,6 +8,9 @@ use ReflectionProperty;
 
 final class TypedPropertyResolver implements PropertyTypeResolver
 {
+    /**
+     * @param ReflectionClass<object> $class
+     */
     public function resolveType(ReflectionClass $class, ReflectionProperty $property): TypeInfo
     {
         $type = $property->getType();
