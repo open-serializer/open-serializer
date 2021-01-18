@@ -2,6 +2,7 @@
 
 namespace OpenSerializer\Type;
 
+use function class_exists;
 use function in_array;
 
 final class TypeInfo
@@ -9,36 +10,34 @@ final class TypeInfo
     public const SCALAR_TYPES = ['int', 'float', 'string', 'bool'];
 
     private string $type;
-    private bool $isArray;
-    private bool $isObject;
     private bool $isNullable;
+    private ?TypeInfo $innerType;
 
-    private function __construct(string $type, bool $isNullable, bool $isArray, bool $isObject)
+    private function __construct(string $type, bool $isNullable, ?TypeInfo $innerType = null)
     {
         $this->type = $type;
         $this->isNullable = $isNullable;
-        $this->isArray = $isArray;
-        $this->isObject = $isObject;
+        $this->innerType = $innerType;
     }
 
     public static function ofMixed(): self
     {
-        return new self('mixed', true, false, false);
+        return new self('mixed', true, null);
     }
 
     public static function ofBuiltIn(string $type, bool $isNullable): self
     {
-        return new self($type, $isNullable, false, false);
+        return new self($type, $isNullable);
     }
 
     public static function ofObject(string $type, bool $isNullable): self
     {
-        return new self($type, $isNullable, false, true);
+        return new self($type, $isNullable);
     }
 
-    public static function ofTypedArray(string $type, bool $isNullable): self
+    public static function ofArray(bool $isNullable, ?TypeInfo $innerType): self
     {
-        return new self($type, $isNullable, true, false);
+        return new self('array', $isNullable, $innerType);
     }
 
     public function type(): string
@@ -46,14 +45,19 @@ final class TypeInfo
         return $this->type;
     }
 
+    public function innerType(): TypeInfo
+    {
+        return $this->innerType ?? TypeInfo::ofMixed();
+    }
+
     public function isArray(): bool
     {
-        return $this->isArray;
+        return $this->type === 'array';
     }
 
     public function isObject(): bool
     {
-        return $this->isObject;
+        return class_exists($this->type);
     }
 
     public function isNullable(): bool
@@ -69,8 +73,8 @@ final class TypeInfo
     public function isStrict(): bool
     {
         return $this->isScalar()
-            || $this->isObject
-            || $this->isArray && $this->type !== 'mixed';
+            || $this->isObject()
+            || $this->isArray() && $this->innerType !== null;
     }
 
     public function isMixed(): bool

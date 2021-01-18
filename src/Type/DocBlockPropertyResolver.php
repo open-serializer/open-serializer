@@ -4,6 +4,7 @@ namespace OpenSerializer\Type;
 
 use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use phpDocumentor\Reflection\DocBlockFactory;
+use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\TypeResolver;
 use phpDocumentor\Reflection\Types\Array_;
 use phpDocumentor\Reflection\Types\Boolean;
@@ -51,6 +52,12 @@ final class DocBlockPropertyResolver implements PropertyTypeResolver
         /** @var Var_ $varTag */
         $varTag = $varTags[0];
         $type = $varTag->getType();
+
+        return $this->typeFromDoc($type);
+    }
+
+    private function typeFromDoc(?Type $type): TypeInfo
+    {
         $isNullable = false;
 
         if ($type instanceof Compound) {
@@ -63,11 +70,13 @@ final class DocBlockPropertyResolver implements PropertyTypeResolver
             if ($types[0] instanceof Null_) {
                 $type = $types[1];
                 $isNullable = true;
-            } else if ($types[1] instanceof Null_) {
-                $type = $types[0];
-                $isNullable = true;
             } else {
-                return TypeInfo::ofMixed();
+                if ($types[1] instanceof Null_) {
+                    $type = $types[0];
+                    $isNullable = true;
+                } else {
+                    return TypeInfo::ofMixed();
+                }
             }
         }
 
@@ -82,7 +91,7 @@ final class DocBlockPropertyResolver implements PropertyTypeResolver
                 return TypeInfo::ofObject((string)$type, $isNullable);
 
             case $type instanceof Array_:
-                return TypeInfo::ofTypedArray((string)$type->getValueType(), $isNullable);
+                return TypeInfo::ofArray($isNullable, $this->typeFromDoc($type->getValueType()));
         }
 
         return TypeInfo::ofMixed();

@@ -4,6 +4,7 @@ namespace OpenSerializer;
 
 use LogicException;
 use OpenSerializer\Type\PropertyTypeResolvers;
+use OpenSerializer\Type\TypeInfo;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionProperty;
@@ -63,6 +64,11 @@ final class StructDeserializer
     {
         $type = $this->typeResolver->resolveType($class, $property);
 
+        return $this->deserializeValue($type, $value);
+    }
+
+    private function deserializeValue(TypeInfo $type, $value)
+    {
         if ($value === null && $type->isNullable()) {
             return null;
         }
@@ -70,7 +76,7 @@ final class StructDeserializer
         if ($type->isArray()) {
             $items = [];
             foreach ($value as $key => $item) {
-                $items[$key] = $this->deserializeObject($type->type(), $item);
+                $items[$key] = $this->deserializeValue($type->innerType(), $item);
             }
 
             return $items;
@@ -85,6 +91,6 @@ final class StructDeserializer
             return $value;
         }
 
-        throw new LogicException("Unable to deserialize property {$property->getName()}");
+        throw new LogicException("Unable to deserialize property");
     }
 }

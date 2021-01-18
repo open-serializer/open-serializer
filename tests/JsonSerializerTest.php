@@ -6,8 +6,10 @@ use DateTimeImmutable;
 use LogicException;
 use OpenSerializer\JsonObject;
 use OpenSerializer\JsonSerializer;
+use OpenSerializer\Tests\Stub\ArrayOfArraysOfIntegersTyped;
+use OpenSerializer\Tests\Stub\ArrayOfIntegers;
+use OpenSerializer\Tests\Stub\ArrayOfIntegersTyped;
 use OpenSerializer\Tests\Stub\DatesTyped;
-use OpenSerializer\Tests\Stub\GenericArrays;
 use OpenSerializer\Tests\Stub\IntegersDocs;
 use OpenSerializer\Tests\Stub\IntegersTyped;
 use OpenSerializer\Tests\Stub\Node;
@@ -17,8 +19,7 @@ use function get_class;
 
 final class JsonSerializerTest extends TestCase
 {
-    /** @test */
-    public function it_serializes_int_property(): void
+    public function test_serialization_of_int_property(): void
     {
         $typed = new IntegersTyped(11, 12);
         $documented = new IntegersDocs(13, 14);
@@ -40,15 +41,14 @@ final class JsonSerializerTest extends TestCase
         );
     }
 
-    /** @test */
-    public function it_serializes_list_of_objects(): void
+    public function test_serialization_of_list_of_objects(): void
     {
         $object = new IntegersTyped(1, null);
-        $list = new GenericArrays([$object]);
+        $list = new ArrayOfIntegersTyped($object);
 
         self::assertEquals(
             [
-                'listOfIntegers' => [
+                'items' => [
                     [
                         'intProp' => 1,
                         'nullableIntProp' => null,
@@ -59,8 +59,7 @@ final class JsonSerializerTest extends TestCase
         );
     }
 
-    /** @test */
-    public function it_serializes_nested_structures(): void
+    public function test_serialization_of_nested_structures(): void
     {
         $serializer = new JsonSerializer();
         $tree = new Node(
@@ -102,8 +101,7 @@ final class JsonSerializerTest extends TestCase
         );
     }
 
-    /** @test */
-    public function it_will_not_serialize_datetime(): void
+    public function test_will_not_serialize_datetime(): void
     {
         $this->expectException(LogicException::class);
 
@@ -112,10 +110,9 @@ final class JsonSerializerTest extends TestCase
     }
 
     /**
-     * @test
      * @dataProvider simpleDeserialization
      */
-    public function it_deserialized_simple_object(object $expected, JsonObject $json): void
+    public function test_deserialized_simple_object(object $expected, JsonObject $json): void
     {
         self::assertEquals(
             $expected,
@@ -123,16 +120,15 @@ final class JsonSerializerTest extends TestCase
         );
     }
 
-    /** @test */
-    public function it_deserializes_generic_array(): void
+    public function test_deserialization_of_generic_array(): void
     {
         self::assertEquals(
-            new GenericArrays([new IntegersTyped(1, 2), new IntegersTyped(3, null)]),
+            new ArrayOfIntegersTyped(new IntegersTyped(1, 2), new IntegersTyped(3, null)),
             (new JsonSerializer())->deserialize(
-                GenericArrays::class,
+                ArrayOfIntegersTyped::class,
                 JsonObject::fromArray(
                     [
-                        'listOfIntegers' => [
+                        'items' => [
                             [
                                 'intProp' => 1,
                                 'nullableIntProp' => 2,
@@ -148,8 +144,59 @@ final class JsonSerializerTest extends TestCase
         );
     }
 
-    /** @test */
-    public function it_deserializes_nested_structures()
+    public function test_deserialization_of_array_of_integers(): void
+    {
+        self::assertEquals(
+            new ArrayOfIntegers(123, 321, 213, 231),
+            (new JsonSerializer())->deserialize(
+                ArrayOfIntegers::class,
+                JsonObject::fromArray(['items' => [123, 321, 213, 231]])
+            )
+        );
+    }
+
+    public function test_deserialization_of_array_of_arrays_of_objects(): void
+    {
+        self::assertEquals(
+            new ArrayOfArraysOfIntegersTyped(
+                [
+                    'one' => [new IntegersTyped(12, null), new IntegersTyped(13, 14)],
+                    'two' => [new IntegersTyped(22, null), new IntegersTyped(23, 24)],
+                ]
+            ),
+            (new JsonSerializer())->deserialize(
+                ArrayOfArraysOfIntegersTyped::class,
+                JsonObject::fromArray(
+                    [
+                        'items' => [
+                            'one' => [
+                                [
+                                    'intProp' => 12,
+                                    'nullableIntProp' => null,
+                                ],
+                                [
+                                    'intProp' => 13,
+                                    'nullableIntProp' => 14,
+                                ],
+                            ],
+                            'two' => [
+                                [
+                                    'intProp' => 22,
+                                    'nullableIntProp' => null,
+                                ],
+                                [
+                                    'intProp' => 23,
+                                    'nullableIntProp' => 24,
+                                ],
+                            ],
+                        ],
+                    ]
+                )
+            )
+        );
+    }
+
+    public function test_deserialization_of_nested_structures(): void
     {
         self::assertEquals(
             new Node(new NodeName('root node'), [new Node(new NodeName('child 1'), [])]),
@@ -166,7 +213,7 @@ final class JsonSerializerTest extends TestCase
                                     'value' => 'child 1',
                                 ],
                                 'children' => [],
-                            ]
+                            ],
                         ],
                     ]
                 )
