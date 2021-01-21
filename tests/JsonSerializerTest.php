@@ -111,6 +111,20 @@ final class JsonSerializerTest extends TestCase
         (new JsonSerializer())->serialize($date);
     }
 
+    public function test_will_not_deserialize_datetime(): void
+    {
+        $this->expectException(LogicException::class);
+
+        (new JsonSerializer())->deserialize(DatesTyped::class, JsonObject::fromJsonString('{"date": {"datetime": "2021-01-21"}}'));
+    }
+
+    public function test_will_fail_with_invalid_class_name(): void
+    {
+        $this->expectException(LogicException::class);
+
+        (new JsonSerializer())->deserialize('string', JsonObject::fromJsonString('{"prop":"string"}'));
+    }
+
     /**
      * @dataProvider simpleDeserialization
      */
