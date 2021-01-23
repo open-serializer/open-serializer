@@ -5,7 +5,6 @@ namespace OpenSerializer\Type;
 use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use phpDocumentor\Reflection\DocBlockFactory;
 use phpDocumentor\Reflection\Type;
-use phpDocumentor\Reflection\TypeResolver;
 use phpDocumentor\Reflection\Types\Array_;
 use phpDocumentor\Reflection\Types\Boolean;
 use phpDocumentor\Reflection\Types\Compound;
@@ -24,13 +23,11 @@ final class DocBlockPropertyResolver implements PropertyTypeResolver
 {
     private DocBlockFactory $docblockFactory;
     private ContextFactory $contextFactory;
-    private TypeResolver $typeResolver;
 
     public function __construct()
     {
         $this->docblockFactory = DocBlockFactory::createInstance();
         $this->contextFactory = new ContextFactory();
-        $this->typeResolver = new TypeResolver();
     }
 
     /**
@@ -73,13 +70,11 @@ final class DocBlockPropertyResolver implements PropertyTypeResolver
             if ($types[0] instanceof Null_) {
                 $type = $types[1];
                 $isNullable = true;
+            } else if ($types[1] instanceof Null_) {
+                $type = $types[0];
+                $isNullable = true;
             } else {
-                if ($types[1] instanceof Null_) {
-                    $type = $types[0];
-                    $isNullable = true;
-                } else {
-                    return TypeInfo::ofMixed();
-                }
+                return TypeInfo::ofMixed();
             }
         }
 

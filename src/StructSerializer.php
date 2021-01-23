@@ -4,6 +4,7 @@ namespace OpenSerializer;
 
 use LogicException;
 use ReflectionClass;
+use ReflectionException;
 use function get_class;
 use function gettype;
 use function is_array;

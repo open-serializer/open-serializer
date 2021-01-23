@@ -11,14 +11,25 @@ use OpenSerializer\Tests\Stub\ArrayOfIntegers;
 use OpenSerializer\Tests\Stub\ArrayOfIntegersTyped;
 use OpenSerializer\Tests\Stub\ArrayOfMixed;
 use OpenSerializer\Tests\Stub\ArrayOfUnknown;
+use OpenSerializer\Tests\Stub\BooleansDocs;
+use OpenSerializer\Tests\Stub\BooleansTyped;
+use OpenSerializer\Tests\Stub\ClosureTyped;
 use OpenSerializer\Tests\Stub\DatesTyped;
+use OpenSerializer\Tests\Stub\DefaultsTyped;
+use OpenSerializer\Tests\Stub\FloatsDocs;
+use OpenSerializer\Tests\Stub\FloatsTyped;
 use OpenSerializer\Tests\Stub\IntegersDocs;
 use OpenSerializer\Tests\Stub\IntegersTyped;
 use OpenSerializer\Tests\Stub\ListOfIntegers;
 use OpenSerializer\Tests\Stub\Node;
 use OpenSerializer\Tests\Stub\NodeName;
+use OpenSerializer\Tests\Stub\ResourceDocs;
+use OpenSerializer\Tests\Stub\StringsDocs;
+use OpenSerializer\Tests\Stub\StringsTyped;
+use OpenSerializer\Tests\Stub\UnknownType;
 use PHPUnit\Framework\TestCase;
 use function get_class;
+use function tmpfile;
 
 final class JsonSerializerTest extends TestCase
 {
@@ -29,16 +40,16 @@ final class JsonSerializerTest extends TestCase
 
         self::assertEquals(
             [
-                'intProp' => 11,
-                'nullableIntProp' => 12,
+                'integer' => 11,
+                'nullableInteger' => 12,
             ],
             (new JsonSerializer())->serialize($typed)->decode()
         );
 
         self::assertEquals(
             [
-                'intProp' => 13,
-                'nullableIntProp' => 14,
+                'integer' => 13,
+                'nullableInteger' => 14,
             ],
             (new JsonSerializer())->serialize($documented)->decode()
         );
@@ -53,8 +64,8 @@ final class JsonSerializerTest extends TestCase
             [
                 'items' => [
                     [
-                        'intProp' => 1,
-                        'nullableIntProp' => null,
+                        'integer' => 1,
+                        'nullableInteger' => null,
                     ],
                 ],
             ],
@@ -146,12 +157,12 @@ final class JsonSerializerTest extends TestCase
                     [
                         'items' => [
                             [
-                                'intProp' => 1,
-                                'nullableIntProp' => 2,
+                                'integer' => 1,
+                                'nullableInteger' => 2,
                             ],
                             [
-                                'intProp' => 3,
-                                'nullableIntProp' => null,
+                                'integer' => 3,
+                                'nullableInteger' => null,
                             ],
                         ],
                     ]
@@ -198,22 +209,22 @@ final class JsonSerializerTest extends TestCase
                         'items' => [
                             'one' => [
                                 [
-                                    'intProp' => 12,
-                                    'nullableIntProp' => null,
+                                    'integer' => 12,
+                                    'nullableInteger' => null,
                                 ],
                                 [
-                                    'intProp' => 13,
-                                    'nullableIntProp' => 14,
+                                    'integer' => 13,
+                                    'nullableInteger' => 14,
                                 ],
                             ],
                             'two' => [
                                 [
-                                    'intProp' => 22,
-                                    'nullableIntProp' => null,
+                                    'integer' => 22,
+                                    'nullableInteger' => null,
                                 ],
                                 [
-                                    'intProp' => 23,
-                                    'nullableIntProp' => 24,
+                                    'integer' => 23,
+                                    'nullableInteger' => 24,
                                 ],
                             ],
                         ],
@@ -270,16 +281,107 @@ final class JsonSerializerTest extends TestCase
         );
     }
 
+    public function test_fails_to_deserialize_unknown_type(): void
+    {
+        $this->expectException(LogicException::class);
+
+        (new JsonSerializer())->deserialize(
+            UnknownType::class,
+            JsonObject::fromJsonString('{"unknown": {"whatever": true}}')
+        );
+    }
+
+    public function test_fails_to_serialize_closure(): void
+    {
+        $this->expectException(LogicException::class);
+
+        (new JsonSerializer())->serialize(new ClosureTyped(fn() => 'hello world'));
+    }
+
+    public function test_fails_to_serialize_resource(): void
+    {
+        $res = tmpfile();
+        self::assertNotFalse($res);
+
+        $this->expectException(LogicException::class);
+
+        (new JsonSerializer())->serialize(new ResourceDocs($res));
+    }
+
     public function simpleDeserialization(): array
     {
         return [
             [
                 new IntegersTyped(11, 12),
-                JsonObject::fromArray(['intProp' => 11, 'nullableIntProp' => 12]),
+                JsonObject::fromJsonString('{"integer": 11, "nullableInteger": 12}'),
             ],
             [
                 new IntegersTyped(11, null),
-                JsonObject::fromArray(['intProp' => 11, 'nullableIntProp' => null]),
+                JsonObject::fromJsonString('{"integer": 11, "nullableInteger": null}'),
+            ],
+            [
+                new IntegersDocs(11, 12),
+                JsonObject::fromJsonString('{"integer": 11, "nullableInteger": 12}'),
+            ],
+            [
+                new IntegersDocs(11, null),
+                JsonObject::fromJsonString('{"integer": 11, "nullableInteger": null}'),
+            ],
+            [
+                new FloatsTyped(1.23, 4.56),
+                JsonObject::fromJsonString('{"float": 1.23,"nullableFloat": 4.56}'),
+            ],
+            [
+                new FloatsTyped(1.23, null),
+                JsonObject::fromJsonString('{"float": 1.23,"nullableFloat": null}'),
+            ],
+            [
+                new FloatsDocs(1.23, 4.56),
+                JsonObject::fromJsonString('{"float": 1.23,"nullableFloat": 4.56}'),
+            ],
+            [
+                new FloatsDocs(1.23, null),
+                JsonObject::fromJsonString('{"float": 1.23,"nullableFloat": null}'),
+            ],
+            [
+                new BooleansTyped(true, false),
+                JsonObject::fromJsonString('{"boolean": true,"nullableBoolean": false}'),
+            ],
+            [
+                new BooleansTyped(true, null),
+                JsonObject::fromJsonString('{"boolean": true,"nullableBoolean": null}'),
+            ],
+            [
+                new BooleansDocs(true, false),
+                JsonObject::fromJsonString('{"boolean": true,"nullableBoolean": false}'),
+            ],
+            [
+                new BooleansDocs(true, null),
+                JsonObject::fromJsonString('{"boolean": true,"nullableBoolean": null}'),
+            ],
+            [
+                new StringsTyped("a string", "optional string"),
+                JsonObject::fromJsonString('{"string": "a string", "nullableString": "optional string"}'),
+            ],
+            [
+                new StringsTyped("a string", null),
+                JsonObject::fromJsonString('{"string": "a string", "nullableString": null}'),
+            ],
+            [
+                new StringsDocs("a string", "optional string"),
+                JsonObject::fromJsonString('{"string": "a string", "nullableString": "optional string"}'),
+            ],
+            [
+                new StringsDocs("a string", null),
+                JsonObject::fromJsonString('{"string": "a string", "nullableString": null}'),
+            ],
+            [
+                new DefaultsTyped(),
+                JsonObject::fromJsonString('{}'),
+            ],
+            [
+                new DefaultsTyped(null, 'custom'),
+                JsonObject::fromJsonString('{"nullableString": "custom"}'),
             ],
         ];
     }

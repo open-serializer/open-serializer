@@ -32,12 +32,12 @@ final class StructDeserializer
     {
         try {
             $classReflection = new ReflectionClass($class);
+            $object = $classReflection->newInstanceWithoutConstructor();
         } catch (ReflectionException $reflectionException) {
             throw new LogicException("Cannot create new {$class}", 0, $reflectionException);
         }
 
         self::assertUserDefined($classReflection);
-        $object = $classReflection->newInstanceWithoutConstructor();
 
         foreach ($classReflection->getProperties() as $property) {
             if (!array_key_exists($property->getName(), $struct)) {

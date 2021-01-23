@@ -4,12 +4,12 @@ namespace OpenSerializer\Tests\Stub;
 
 final class IntegersTyped
 {
-    private int $intProp;
-    private ?int $nullableIntProp;
+    private int $integer;
+    private ?int $nullableInteger;
 
-    public function __construct(int $intProp, ?int $nullableIntProp)
+    public function __construct(int $integer, ?int $nullableInteger)
     {
-        $this->intProp = $intProp;
-        $this->nullableIntProp = $nullableIntProp;
+        $this->integer = $integer;
+        $this->nullableInteger = $nullableInteger;
     }
 }

@@ -1,24 +1,17 @@
 {
-    "name": "dazet/open-serializer",
+    "name": "open-serializer/open-serializer",
     "description": "Simple JSON serializer/deserializer.",
     "type": "library",
     "require": {
         "php": "^7.4 || ^8.0",
         "ext-json": "*",
-        "phpdocumentor/reflection-docblock": "^5.2.2",
-        "phpdocumentor/type-resolver": "^1.4.0"
+        "phpdocumentor/reflection-docblock": "^5.2.2"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5",
         "phpstan/phpstan": "^0.12.67"
     },
     "license": "MIT",
-    "authors": [
-        {
-            "name": "Damian Zaprzałek",
-            "email": "dazet.me@gmail.com"
-        }
-    ],
     "autoload": {
         "psr-4": {
             "OpenSerializer\\": "src/"

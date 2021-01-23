@@ -5,13 +5,13 @@ namespace OpenSerializer\Tests\Stub;
 final class IntegersDocs
 {
     /** @var int */
-    private $intProp;
+    private $integer;
     /** @var null|int */
-    private $nullableIntProp;
+    private $nullableInteger;
 
-    public function __construct(int $intProp, ?int $nullableIntProp)
+    public function __construct(int $integer, ?int $nullableInteger)
     {
-        $this->intProp = $intProp;
-        $this->nullableIntProp = $nullableIntProp;
+        $this->integer = $integer;
+        $this->nullableInteger = $nullableInteger;
     }
 }
