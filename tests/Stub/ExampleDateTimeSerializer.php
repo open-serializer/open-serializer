@@ -6,15 +6,16 @@ use DateTimeImmutable;
 use DateTimeZone;
 use LogicException;
 use OpenSerializer\TypeDeserializer;
-use OpenSerializer\ObjectSerializer;
+use OpenSerializer\TypeSerializer;
 use function get_class;
 use function json_encode;
 use function sprintf;
 
 /**
+ * @implements TypeSerializer<DateTimeImmutable>
  * @implements TypeDeserializer<DateTimeImmutable>
  */
-final class ExampleDateTimeSerializer implements ObjectSerializer, TypeDeserializer
+final class ExampleDateTimeSerializer implements TypeSerializer, TypeDeserializer
 {
     public function serializeObject(object $object): array
     {

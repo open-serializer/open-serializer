@@ -3,6 +3,7 @@
 namespace OpenSerializer;
 
 use OpenSerializer\Deserialize\ReflectingDeserializer;
+use Webmozart\Assert\Assert;
 
 final class StructDeserializer implements ObjectDeserializer
 {
@@ -20,6 +21,7 @@ final class StructDeserializer implements ObjectDeserializer
      */
     public function __construct(array $customDeserializers = [])
     {
+        Assert::allIsInstanceOf($customDeserializers, TypeDeserializer::class);
         $this->default = new ReflectingDeserializer($this);
         $this->custom = $customDeserializers;
     }

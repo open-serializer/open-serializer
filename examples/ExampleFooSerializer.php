@@ -3,16 +3,20 @@
 namespace OpenSerializer\Examples;
 
 use LogicException;
+use OpenSerializer\TypeSerializer;
 use OpenSerializer\TypeDeserializer;
-use OpenSerializer\ObjectSerializer;
 use function get_class;
 use function sprintf;
 
 /**
+ * @implements TypeSerializer<Foo>
  * @implements TypeDeserializer<Foo>
  */
-final class ExampleFooSerializer implements ObjectSerializer, TypeDeserializer
+final class ExampleFooSerializer implements TypeSerializer, TypeDeserializer
 {
+    /**
+     * @param Foo $object
+     */
     public function serializeObject(object $object): array
     {
         if (!$object instanceof Foo) {
