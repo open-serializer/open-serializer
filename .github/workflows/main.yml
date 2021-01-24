@@ -30,7 +30,7 @@ jobs:
                 run: ./vendor/bin/phpstan analyze
 
             -   name: "PHPUnit"
-                run: ./vendor/bin/phpunit tests --coverage-html=coverage --coverage-filter=src --coverage-xml=coverage
+                run: ./vendor/bin/phpunit tests --coverage-html=coverage --coverage-filter=src --coverage-xml=coverage --coverage-clover=clover.xml
 
             -   name: "Psalm"
                 run: ./vendor/bin/psalm
@@ -41,17 +41,24 @@ jobs:
                     name: code-coverage-report
                     path: coverage/
 
-            -   name: Generate a coverage value
-                id: getxml
-                uses: mavrosxristoforos/get-xml-info@1.0
+            -   uses: codecov/codecov-action@v1
                 with:
-                    xml-file: 'coverage/index.xml'
-                    xpath: '//phpunit/project/directory/totals/lines/@percent'
-
-            -   name: Generate the badge SVG image
-                uses: emibcn/badge-action@v1
-                with:
-                    label: 'Test coverage'
-                    status: ${{ steps.getxml.outputs.info }}
-                    color: 'blue,555,daf'
-                    path: '.github/badges/coverage.svg'
+                    token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+                    files: ./clover.xml # optional
+                    fail_ci_if_error: true # optional (default = false)
+                    verbose: true # optional (default = false)
+#
+#            -   name: Generate a coverage value
+#                id: getxml
+#                uses: mavrosxristoforos/get-xml-info@1.0
+#                with:
+#                    xml-file: 'coverage/index.xml'
+#                    xpath: '//phpunit/project/directory/totals/lines/@percent'
+#
+#            -   name: Generate the badge SVG image
+#                uses: emibcn/badge-action@v1
+#                with:
+#                    label: 'Test coverage'
+#                    status: ${{ steps.getxml.outputs.info }}
+#                    color: 'blue,555,daf'
+#                    path: '.github/badges/coverage.svg'
