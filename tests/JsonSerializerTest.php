@@ -140,6 +140,7 @@ final class JsonSerializerTest extends TestCase
     {
         $this->expectException(LogicException::class);
 
+        /** @phpstan-ignore-next-line */
         (new JsonSerializer())->deserialize('string', JsonObject::fromJsonString('{"prop":"string"}'));
     }
 
@@ -312,6 +313,7 @@ final class JsonSerializerTest extends TestCase
 
         $this->expectException(LogicException::class);
 
+        /** @phpstan-ignore-next-line */
         (new JsonSerializer())->serialize(new ResourceDocs($res));
     }
 

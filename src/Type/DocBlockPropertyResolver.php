@@ -59,6 +59,7 @@ final class DocBlockPropertyResolver implements PropertyTypeResolver
         return $this->typeFromDoc($class, $type);
     }
 
+    /** @param ReflectionClass<object> $class */
     private function typeFromDoc(ReflectionClass $class, ?Type $type): TypeInfo
     {
         $isNullable = false;
