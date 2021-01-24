@@ -46,8 +46,14 @@ jobs:
                     token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
                     files: ./clover.xml # optional
                     fail_ci_if_error: true # optional (default = false)
-                    verbose: true # optional (default = false)
-#
+
+            -   name: Check test coverage
+                id: test-coverage
+                uses: johanvanhelden/gha-clover-test-coverage-check@v1
+                with:
+                    percentage: "95"
+                    filename: "clover.xml"
+
 #            -   name: Generate a coverage value
 #                id: getxml
 #                uses: mavrosxristoforos/get-xml-info@1.0
