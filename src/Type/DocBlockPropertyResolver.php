@@ -13,7 +13,10 @@ use phpDocumentor\Reflection\Types\Float_;
 use phpDocumentor\Reflection\Types\Integer;
 use phpDocumentor\Reflection\Types\Null_;
 use phpDocumentor\Reflection\Types\Object_;
+use phpDocumentor\Reflection\Types\Self_;
+use phpDocumentor\Reflection\Types\Static_;
 use phpDocumentor\Reflection\Types\String_;
+use phpDocumentor\Reflection\Types\This;
 use ReflectionClass;
 use ReflectionProperty;
 use function count;
@@ -53,10 +56,10 @@ final class DocBlockPropertyResolver implements PropertyTypeResolver
         $varTag = $varTags[0];
         $type = $varTag->getType();
 
-        return $this->typeFromDoc($type);
+        return $this->typeFromDoc($class, $type);
     }
 
-    private function typeFromDoc(?Type $type): TypeInfo
+    private function typeFromDoc(ReflectionClass $class, ?Type $type): TypeInfo
     {
         $isNullable = false;
 
@@ -88,9 +91,16 @@ final class DocBlockPropertyResolver implements PropertyTypeResolver
             case $type instanceof Object_:
                 return TypeInfo::ofObject((string)$type, $isNullable);
 
+            case $type instanceof Self_:
+            case $type instanceof This:
+            case $type instanceof Static_:
+                return TypeInfo::ofObject($class->getName(), $isNullable);
+
             case $type instanceof Array_:
-                return TypeInfo::ofArray($isNullable, $this->typeFromDoc($type->getValueType()));
+                return TypeInfo::ofArray($isNullable, $this->typeFromDoc($class, $type->getValueType()));
         }
+
+        // TODO fail here when type is not mixed, but unsupported
 
         return TypeInfo::ofMixed();
     }

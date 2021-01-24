@@ -27,6 +27,8 @@ use OpenSerializer\Tests\Stub\IntegersTyped;
 use OpenSerializer\Tests\Stub\ListOfIntegers;
 use OpenSerializer\Tests\Stub\Node;
 use OpenSerializer\Tests\Stub\NodeName;
+use OpenSerializer\Tests\Stub\NodeSelf;
+use OpenSerializer\Tests\Stub\NodeStatic;
 use OpenSerializer\Tests\Stub\ResourceDocs;
 use OpenSerializer\Tests\Stub\StringsDocs;
 use OpenSerializer\Tests\Stub\StringsTyped;
@@ -347,6 +349,136 @@ final class JsonSerializerTest extends TestCase
                         'date' => [
                             'atom' => $today->format(DateTimeImmutable::ATOM),
                             'timezone' => 'Europe/Warsaw',
+                        ],
+                    ]
+                )
+            )
+        );
+    }
+
+    public function test_serializing_class_with_self_properties(): void
+    {
+        self::assertEquals(
+            [
+                'name' => 'parent',
+                'child' => [
+                    'name' => 'child',
+                    'child' => null,
+                    'otherChildren' => [],
+                ],
+                'otherChildren' => [
+                    [
+                        'name' => 'other child 1',
+                        'child' => null,
+                        'otherChildren' => [],
+                    ],
+                    [
+                        'name' => 'other child 2',
+                        'child' => null,
+                        'otherChildren' => [],
+                    ],
+                ]
+            ],
+            (new JsonSerializer())
+                ->serialize(
+                    new NodeSelf(
+                        'parent',
+                        new NodeSelf('child', null),
+                        new NodeSelf('other child 1', null),
+                        new NodeSelf('other child 2', null)
+                    )
+                )
+                ->decode()
+        );
+    }
+
+    public function test_deserializing_class_with_self_properties(): void
+    {
+        self::assertEquals(
+            new NodeSelf(
+                'parent',
+                new NodeSelf('child', null),
+                new NodeSelf('other child 1', null),
+                new NodeSelf('other child 2', null)
+            ),
+            (new JsonSerializer())->deserialize(
+                NodeSelf::class,
+                JsonObject::fromArray(
+                    [
+                        'name' => 'parent',
+                        'child' => [
+                            'name' => 'child',
+                            'child' => null,
+                            'otherChildren' => [],
+                        ],
+                        'otherChildren' => [
+                            [
+                                'name' => 'other child 1',
+                                'child' => null,
+                                'otherChildren' => [],
+                            ],
+                            [
+                                'name' => 'other child 2',
+                                'child' => null,
+                                'otherChildren' => [],
+                            ],
+                        ],
+                    ]
+                )
+            )
+        );
+    }
+
+    public function test_serializing_class_with_static_properties(): void
+    {
+        self::assertEquals(
+            [
+                'name' => 'parent',
+                'children' => [
+                    [
+                        'name' => 'child 1',
+                        'children' => [],
+                    ],
+                    [
+                        'name' => 'child 2',
+                        'children' => [],
+                    ],
+                ],
+            ],
+            (new JsonSerializer())
+                ->serialize(
+                    new NodeStatic(
+                        'parent',
+                        new NodeStatic('child 1'),
+                        new NodeStatic('child 2'),
+                    )
+                )
+                ->decode()
+        );
+    }
+
+    public function test_deserializing_class_with_static_properties(): void
+    {
+        self::assertEquals(
+            new NodeStatic(
+                'parent',
+                new NodeStatic('child 1'),
+                new NodeStatic('child 2'),
+            ),
+            (new JsonSerializer())->deserialize(
+                NodeStatic::class,
+                JsonObject::fromArray(
+                    [
+                        'name' => 'parent',
+                        'children' => [
+                            [
+                                'name' => 'child 1',
+                                'children' => [],
+                            ],
+                            [
+                                'name' => 'child 2',
+                                'children' => [],
+                            ],
                         ],
                     ]
                 )
