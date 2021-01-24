@@ -5,7 +5,7 @@ namespace OpenSerializer;
 /**
  * @template T of object
  */
-interface CustomDeserializer
+interface TypeDeserializer
 {
     /**
      * @param class-string<T> $class

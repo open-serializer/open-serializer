@@ -3,15 +3,15 @@
 namespace OpenSerializer\Examples;
 
 use LogicException;
-use OpenSerializer\CustomDeserializer;
+use OpenSerializer\TypeDeserializer;
 use OpenSerializer\ObjectSerializer;
 use function get_class;
 use function sprintf;
 
 /**
- * @implements CustomDeserializer<Foo>
+ * @implements TypeDeserializer<Foo>
  */
-final class ExampleFooSerializer implements ObjectSerializer, CustomDeserializer
+final class ExampleFooSerializer implements ObjectSerializer, TypeDeserializer
 {
     public function serializeObject(object $object): array
     {

@@ -5,16 +5,16 @@ namespace OpenSerializer\Tests\Stub;
 use DateTimeImmutable;
 use DateTimeZone;
 use LogicException;
-use OpenSerializer\CustomDeserializer;
+use OpenSerializer\TypeDeserializer;
 use OpenSerializer\ObjectSerializer;
 use function get_class;
 use function json_encode;
 use function sprintf;
 
 /**
- * @implements CustomDeserializer<DateTimeImmutable>
+ * @implements TypeDeserializer<DateTimeImmutable>
  */
-final class ExampleDateTimeSerializer implements ObjectSerializer, CustomDeserializer
+final class ExampleDateTimeSerializer implements ObjectSerializer, TypeDeserializer
 {
     public function serializeObject(object $object): array
     {
