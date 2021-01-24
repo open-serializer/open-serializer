@@ -19,6 +19,7 @@ jobs:
             -   name: Setup PHP
                 uses: shivammathur/setup-php@v2
                 with:
+                    coverage: pcov
                     php-version: ${{ matrix.php-versions }}
                     extensions: mbstring
 
@@ -29,7 +30,7 @@ jobs:
                 run: ./vendor/bin/phpstan analyze
 
             -   name: "PHPUnit"
-                run: ./vendor/bin/phpunit tests
+                run: ./vendor/bin/phpunit tests --coverage-html=coverage
 
             -   name: "Psalm"
                 run: ./vendor/bin/psalm
