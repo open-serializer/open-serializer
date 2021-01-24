@@ -84,9 +84,11 @@ final class DocBlockPropertyResolver implements PropertyTypeResolver
         switch (true) {
             case $type instanceof String_:
             case $type instanceof Integer:
-            case $type instanceof Boolean:
             case $type instanceof Float_:
                 return TypeInfo::ofBuiltIn((string)$type, $isNullable);
+
+            case $type instanceof Boolean:
+                return TypeInfo::ofBuiltIn('bool', $isNullable);
 
             case $type instanceof Object_:
                 return TypeInfo::ofObject((string)$type, $isNullable);

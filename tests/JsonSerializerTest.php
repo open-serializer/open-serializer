@@ -15,6 +15,7 @@ use OpenSerializer\Tests\Stub\ArrayOfIntegersTyped;
 use OpenSerializer\Tests\Stub\ArrayOfMixed;
 use OpenSerializer\Tests\Stub\ArrayOfUnknown;
 use OpenSerializer\Tests\Stub\BooleansDocs;
+use OpenSerializer\Tests\Stub\BooleansFreak;
 use OpenSerializer\Tests\Stub\BooleansTyped;
 use OpenSerializer\Tests\Stub\ClosureTyped;
 use OpenSerializer\Tests\Stub\DatesTyped;
@@ -482,6 +483,17 @@ final class JsonSerializerTest extends TestCase
                         ],
                     ]
                 )
+            )
+        );
+    }
+
+    public function test_recognizing_true_and_false_as_boolean(): void
+    {
+        self::assertEquals(
+            new BooleansFreak(true, false),
+            (new JsonSerializer())->deserialize(
+                BooleansFreak::class,
+                JsonObject::fromJsonString('{"true":true,"false":false}')
             )
         );
     }
