@@ -3,7 +3,7 @@ name: tests
 on:
     push: { branches: [ master ] }
     pull_request: ~
-    
+
 jobs:
     run:
         name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
@@ -30,7 +30,34 @@ jobs:
                 run: ./vendor/bin/phpstan analyze
 
             -   name: "PHPUnit"
-                run: ./vendor/bin/phpunit tests --coverage-html=coverage
+                run: ./vendor/bin/phpunit tests --coverage-html=coverage --coverage-filter=src --coverage-xml=coverage
 
             -   name: "Psalm"
                 run: ./vendor/bin/psalm
+
+            -   name: Archive code coverage results
+                uses: actions/upload-artifact@v2
+                with:
+                    name: code-coverage-report
+                    path: coverage/
+
+            -   name: Generate a coverage value
+                id: coverage
+                run: |
+                    COVERAGE="$( parse-covergae-report )"
+                    echo "##[set-output name=line
+
+            -   name: Get XML
+                id: getxml
+                uses: mavrosxristoforos/get-xml-info@1.0
+                with:
+                    xml-file: 'coverage/index.xml'
+                    xpath: '/phpunit/project/directory/totals/lines/@percent'
+
+            -   name: Generate the badge SVG image
+                uses: emibcn/badge-action@v1
+                with:
+                    label: 'Test coverage'
+                    status: ${{ steps.getxml.outputs.info }}
+                    color: 'blue,555,daf'
+                    path: '.github/badges/coverage.svg'
