@@ -46,7 +46,7 @@ jobs:
                 uses: mavrosxristoforos/get-xml-info@1.0
                 with:
                     xml-file: 'coverage/index.xml'
-                    xpath: '/phpunit/project/directory/totals/lines/@percent'
+                    xpath: '//phpunit/project/directory/totals/lines/@percent'
 
             -   name: Generate the badge SVG image
                 uses: emibcn/badge-action@v1
