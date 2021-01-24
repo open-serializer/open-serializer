@@ -3,9 +3,12 @@
 namespace OpenSerializer\Tests;
 
 use DateTimeImmutable;
+use DateTimeZone;
 use LogicException;
 use OpenSerializer\JsonObject;
 use OpenSerializer\JsonSerializer;
+use OpenSerializer\StructDeserializer;
+use OpenSerializer\StructSerializer;
 use OpenSerializer\Tests\Stub\ArrayOfArraysOfIntegersTyped;
 use OpenSerializer\Tests\Stub\ArrayOfIntegers;
 use OpenSerializer\Tests\Stub\ArrayOfIntegersTyped;
@@ -16,6 +19,7 @@ use OpenSerializer\Tests\Stub\BooleansTyped;
 use OpenSerializer\Tests\Stub\ClosureTyped;
 use OpenSerializer\Tests\Stub\DatesTyped;
 use OpenSerializer\Tests\Stub\DefaultsTyped;
+use OpenSerializer\Tests\Stub\ExampleDateTimeSerializer;
 use OpenSerializer\Tests\Stub\FloatsDocs;
 use OpenSerializer\Tests\Stub\FloatsTyped;
 use OpenSerializer\Tests\Stub\IntegersDocs;
@@ -306,6 +310,48 @@ final class JsonSerializerTest extends TestCase
         $this->expectException(LogicException::class);
 
         (new JsonSerializer())->serialize(new ResourceDocs($res));
+    }
+
+    public function test_serializing_DateTime_with_custom_serializer(): void
+    {
+        $today = new DateTimeImmutable('today 12:00', new DateTimeZone('Europe/Warsaw'));
+        $serializer = new JsonSerializer(
+            new StructSerializer([DateTimeImmutable::class => new ExampleDateTimeSerializer()])
+        );
+
+        self::assertEquals(
+            [
+                'date' => [
+                    'atom' => $today->format(DateTimeImmutable::ATOM),
+                    'timezone' => 'Europe/Warsaw',
+                ],
+            ],
+            $serializer->serialize(new DatesTyped($today))->decode()
+        );
+    }
+
+    public function test_deserializing_DateTime_with_custom_serializer(): void
+    {
+        $today = new DateTimeImmutable('today 12:00', new DateTimeZone('Europe/Warsaw'));
+        $serializer = new JsonSerializer(
+            null,
+            new StructDeserializer([DateTimeImmutable::class => new ExampleDateTimeSerializer()])
+        );
+
+        self::assertEquals(
+            new DatesTyped($today),
+            $serializer->deserialize(
+                DatesTyped::class,
+                JsonObject::fromArray(
+                    [
+                        'date' => [
+                            'atom' => $today->format(DateTimeImmutable::ATOM),
+                            'timezone' => 'Europe/Warsaw',
+                        ],
+                    ]
+                )
+            )
+        );
     }
 
     public function simpleDeserialization(): array

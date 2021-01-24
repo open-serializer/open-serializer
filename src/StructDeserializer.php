@@ -2,124 +2,29 @@
 
 namespace OpenSerializer;
 
-use LogicException;
-use OpenSerializer\Type\PropertyTypeResolvers;
-use OpenSerializer\Type\TypeInfo;
-use ReflectionClass;
-use ReflectionException;
-use ReflectionProperty;
-use function array_key_exists;
-use function class_exists;
+use OpenSerializer\Deserialize\ReflectingDeserializer;
 
-final class StructDeserializer
+final class StructDeserializer implements ObjectDeserializer
 {
-    public const SCALAR_TYPES = ['int', 'float', 'string', 'bool'];
+    private ReflectingDeserializer $default;
+    /** @var array<class-string, ObjectDeserializer> */
+    private array $custom;
 
-    private PropertyTypeResolvers $typeResolver;
-
-    public function __construct()
+    /** @param array<class-string, ObjectDeserializer> $customDeserializers */
+    public function __construct(array $customDeserializers = [])
     {
-        $this->typeResolver = PropertyTypeResolvers::default();
+        $this->default = new ReflectingDeserializer($this);
+        $this->custom = $customDeserializers;
     }
 
     /**
      * @template T of object
      * @param class-string<T> $class
-     * @param array<string, mixed> $struct
+     * @param array<string|int, mixed> $struct
      * @return T
      */
     public function deserializeObject(string $class, array $struct): object
     {
-        try {
-            $classReflection = new ReflectionClass($class);
-            $object = $classReflection->newInstanceWithoutConstructor();
-        } catch (ReflectionException $reflectionException) {
-            throw new LogicException("Cannot create new {$class}", 0, $reflectionException);
-        }
-
-        self::assertUserDefined($classReflection);
-
-        foreach ($classReflection->getProperties() as $property) {
-            if (!array_key_exists($property->getName(), $struct)) {
-                continue;
-            }
-
-            $property->setAccessible(true);
-            $property->setValue(
-                $object,
-                $this->deserializeProperty($classReflection, $property, $struct[$property->getName()])
-            );
-        }
-
-        return $object;
-    }
-
-    /**
-     * @param ReflectionClass<object> $class
-     */
-    private static function assertUserDefined(ReflectionClass $class): void
-    {
-        if (!$class->isUserDefined()) {
-            throw new LogicException("Cannot (de)serialize class {$class->getName()} that is not user defined");
-        }
-    }
-
-    /**
-     * @param ReflectionClass<object> $class
-     * @param mixed $value
-     * @return mixed
-     */
-    private function deserializeProperty(ReflectionClass $class, ReflectionProperty $property, $value)
-    {
-        $type = $this->typeResolver->resolveType($class, $property);
-
-        return $this->deserializeValue($type, $value);
-    }
-
-    /**
-     * @param TypeInfo $type
-     * @param mixed $value
-     * @return mixed
-     */
-    private function deserializeValue(TypeInfo $type, $value)
-    {
-        if ($value === null && $type->isNullable()) {
-            return null;
-        }
-
-        if ($type->isArray()) {
-            $items = [];
-            foreach ($value as $key => $item) {
-                $items[$key] = $this->deserializeValue($type->innerType(), $item);
-            }
-
-            return $items;
-        }
-
-        if (class_exists($type->type())) {
-            return $this->deserializeObject($type->type(), $value);
-        }
-
-        if ($type->isString()) {
-            return (string)$value;
-        }
-
-        if ($type->isInteger()) {
-            return (int)$value;
-        }
-
-        if ($type->isFloat()) {
-            return (float)$value;
-        }
-
-        if ($type->isBoolean()) {
-            return (bool)$value;
-        }
-
-        if ($type->isMixed()) {
-            return $value;
-        }
-
-        throw new LogicException("Unable to deserialize property");
+        return ($this->custom[$class] ?? $this->default)->deserializeObject($class, $struct);
     }
 }

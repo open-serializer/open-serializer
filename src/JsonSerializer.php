@@ -4,13 +4,13 @@ namespace OpenSerializer;
 
 final class JsonSerializer
 {
-    private StructSerializer $serializer;
-    private StructDeserializer $deserializer;
+    private ObjectSerializer $serializer;
+    private ObjectDeserializer $deserializer;
 
-    public function __construct()
+    public function __construct(?ObjectSerializer $serializer = null, ?ObjectDeserializer $deserializer = null)
     {
-        $this->serializer = new StructSerializer();
-        $this->deserializer = new StructDeserializer();
+        $this->serializer = $serializer ?? new StructSerializer();
+        $this->deserializer = $deserializer ?? new StructDeserializer();
     }
 
     public function serialize(object $object): JsonObject
