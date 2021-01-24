@@ -9,14 +9,14 @@ final class StructDeserializer implements ObjectDeserializer
     private ReflectingDeserializer $default;
 
     /**
-     * @var array<class-string, ObjectDeserializer>
-     * @psalm-var class-string-map<T, ObjectDeserializer<T>>
+     * @var array<class-string, CustomDeserializer<object>>
+     * @psalm-var class-string-map<T, CustomDeserializer<T>>
      */
     private array $custom;
 
     /**
-     * @param array<class-string, ObjectDeserializer> $customDeserializers
-     * @psalm-param class-string-map<T, ObjectDeserializer<T>> $customDeserializers
+     * @param array<class-string, CustomDeserializer<object>> $customDeserializers
+     * @psalm-param class-string-map<T, CustomDeserializer<T>> $customDeserializers
      */
     public function __construct(array $customDeserializers = [])
     {
@@ -32,6 +32,13 @@ final class StructDeserializer implements ObjectDeserializer
      */
     public function deserializeObject(string $class, array $struct): object
     {
-        return ($this->custom[$class] ?? $this->default)->deserializeObject($class, $struct);
+        /** @phpstan-var CustomDeserializer<T>|null $customDeserializer */
+        $customDeserializer = $this->custom[$class] ?? null;
+
+        if ($customDeserializer !== null) {
+            return $customDeserializer->deserializeObject($class, $struct);
+        }
+
+        return $this->default->deserializeObject($class, $struct);
     }
 }
