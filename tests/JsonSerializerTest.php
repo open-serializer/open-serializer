@@ -30,6 +30,7 @@ use OpenSerializer\Tests\Stub\Node;
 use OpenSerializer\Tests\Stub\NodeName;
 use OpenSerializer\Tests\Stub\NodeSelf;
 use OpenSerializer\Tests\Stub\NodeStatic;
+use OpenSerializer\Tests\Stub\NotTypedProperty;
 use OpenSerializer\Tests\Stub\ResourceDocs;
 use OpenSerializer\Tests\Stub\StringsDocs;
 use OpenSerializer\Tests\Stub\StringsTyped;
@@ -40,6 +41,18 @@ use function tmpfile;
 
 final class JsonSerializerTest extends TestCase
 {
+    public function test_serialization_of_not_typed_property(): void
+    {
+        $notTyped = new NotTypedProperty(11);
+
+        self::assertEquals(
+            [
+                'prop' => 11,
+            ],
+            (new JsonSerializer())->serialize($notTyped)->decode()
+        );
+    }
+
     public function test_serialization_of_int_property(): void
     {
         $typed = new IntegersTyped(11, 12);
@@ -140,6 +153,7 @@ final class JsonSerializerTest extends TestCase
     {
         $this->expectException(LogicException::class);
 
+        /** @phpstan-ignore-next-line */
         (new JsonSerializer())->deserialize('string', JsonObject::fromJsonString('{"prop":"string"}'));
     }
 
@@ -312,6 +326,7 @@ final class JsonSerializerTest extends TestCase
 
         $this->expectException(LogicException::class);
 
+        /** @phpstan-ignore-next-line */
         (new JsonSerializer())->serialize(new ResourceDocs($res));
     }
 
@@ -572,6 +587,10 @@ final class JsonSerializerTest extends TestCase
             [
                 new DefaultsTyped(null, 'custom'),
                 JsonObject::fromJsonString('{"nullableString": "custom"}'),
+            ],
+            [
+                new NotTypedProperty('custom'),
+                JsonObject::fromJsonString('{"prop": "custom"}'),
             ],
         ];
     }

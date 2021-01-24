@@ -1,0 +1,10 @@
+parameters:
+    level: 8
+    paths:
+        - src
+        - examples
+
+    inferPrivatePropertyTypeFromConstructor: true
+    checkMissingIterableValueType: true
+    checkGenericClassInNonGenericObjectType: true
+    checkMissingCallableSignature: true
