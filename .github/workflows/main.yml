@@ -42,12 +42,6 @@ jobs:
                     path: coverage/
 
             -   name: Generate a coverage value
-                id: coverage
-                run: |
-                    COVERAGE="$( parse-covergae-report )"
-                    echo "##[set-output name=line
-
-            -   name: Get XML
                 id: getxml
                 uses: mavrosxristoforos/get-xml-info@1.0
                 with:
