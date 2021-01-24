@@ -26,10 +26,10 @@ jobs:
                 run: composer install --no-progress --prefer-dist --optimize-autoloader
 
             -   name: "PHPStan"
-                run: ./bin/phpstan analyze
+                run: ./vendor/bin/phpstan analyze
 
             -   name: "PHPUnit"
-                run: ./bin/phpunit tests
+                run: ./vendor/bin/phpunit tests
 
             -   name: "Psalm"
-                run: ./bin/psalm
+                run: ./vendor/bin/psalm
