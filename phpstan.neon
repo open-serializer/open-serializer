@@ -1,0 +1,12 @@
+parameters:
+    level: 8
+    paths:
+        - src
+        - tests
+
+    inferPrivatePropertyTypeFromConstructor: true
+    checkMissingIterableValueType: true
+    checkGenericClassInNonGenericObjectType: true
+
+    ignoreErrors:
+        - { message: '#no (return )?typehint specified#', path: tests }
