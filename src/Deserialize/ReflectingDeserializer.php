@@ -40,12 +40,7 @@ final class ReflectingDeserializer implements ObjectDeserializer
         }
 
         $this->assertCanBeCreated($classReflection);
-
-        try {
-            $object = $classReflection->newInstanceWithoutConstructor();
-        } catch (ReflectionException $reflectionException) {
-            throw new LogicException("Cannot create new {$class}", 0, $reflectionException);
-        }
+        $object = $classReflection->newInstanceWithoutConstructor();
 
         foreach ($classReflection->getProperties() as $property) {
             if (!array_key_exists($property->getName(), $struct)) {
@@ -128,6 +123,10 @@ final class ReflectingDeserializer implements ObjectDeserializer
 
         if ($class->isInterface()) {
             throw new LogicException("Cannot deserialize interface {$class->getName()}");
+        }
+
+        if ($class->isAbstract()) {
+            throw new LogicException("Cannot deserialize abstract class {$class->getName()}");
         }
     }
 }
