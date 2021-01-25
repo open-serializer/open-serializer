@@ -9,7 +9,7 @@ use function json_encode;
 use function json_last_error;
 use function json_last_error_msg;
 
-final class JsonObject
+final class JsonObject implements SerializedObject
 {
     private string $encoded;
     /** @var array<string, mixed> */
@@ -45,6 +45,11 @@ final class JsonObject
     public function encode(): string
     {
         return $this->encoded ?? $this->doEncode();
+    }
+
+    public function toString(): string
+    {
+        return $this->encode();
     }
 
     /** @return array<string, mixed> */
