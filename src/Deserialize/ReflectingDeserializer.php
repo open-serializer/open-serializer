@@ -2,6 +2,7 @@
 
 namespace OpenSerializer\Deserialize;
 
+use Error;
 use LogicException;
 use OpenSerializer\ObjectDeserializer;
 use OpenSerializer\Type\PropertyTypeResolvers;
@@ -34,15 +35,16 @@ final class ReflectingDeserializer implements ObjectDeserializer
     {
         try {
             $classReflection = new ReflectionClass($class);
+        } catch (ReflectionException| Error $reflectionException) {
+            throw new LogicException("Cannot reflect {$class}", 0, $reflectionException);
+        }
+
+        $this->assertCanBeCreated($classReflection);
+
+        try {
             $object = $classReflection->newInstanceWithoutConstructor();
         } catch (ReflectionException $reflectionException) {
             throw new LogicException("Cannot create new {$class}", 0, $reflectionException);
-        }
-
-        if (!$classReflection->isUserDefined()) {
-            throw new LogicException(
-                "Cannot deserialize class {$classReflection->getName()} that is not user defined"
-            );
         }
 
         foreach ($classReflection->getProperties() as $property) {
@@ -115,5 +117,16 @@ final class ReflectingDeserializer implements ObjectDeserializer
         }
 
         throw new LogicException("Unable to deserialize property");
+    }
+
+    private function assertCanBeCreated(ReflectionClass $class): void
+    {
+        if (!$class->isUserDefined()) {
+            throw new LogicException("Cannot deserialize class {$class->getName()} that is not user defined");
+        }
+
+        if ($class->isInterface()) {
+            throw new LogicException("Cannot deserialize interface {$class->getName()}");
+        }
     }
 }

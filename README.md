@@ -87,6 +87,14 @@ $exampleObject = $serializer->deserialize(Example::class, $jsonObject);
 * `DateTimeImmutable`
 * ...
 
+#### Union types (PHP 8)
+
+Union type will be treated as `mixed` and will be deserialized as is in JSON structure.
+
+#### Constructor property (PHP 8)
+
+Currently, constructor property promotion is not supported, planned for the future. 
+
 ## Extending
 
 Sometimes there is a requirement to support internal types, interfaces or implement custom serialization logic.
