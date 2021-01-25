@@ -10,6 +10,7 @@ use OpenSerializer\JsonObject;
 use OpenSerializer\JsonSerializer;
 use OpenSerializer\StructDeserializer;
 use OpenSerializer\StructSerializer;
+use OpenSerializer\Tests\Stub\Abstraction;
 use OpenSerializer\Tests\Stub\ArrayOfArraysOfIntegersTyped;
 use OpenSerializer\Tests\Stub\ArrayOfIntegers;
 use OpenSerializer\Tests\Stub\ArrayOfIntegersTyped;
@@ -34,6 +35,7 @@ use OpenSerializer\Tests\Stub\NodeSelf;
 use OpenSerializer\Tests\Stub\NodeStatic;
 use OpenSerializer\Tests\Stub\NotTypedProperty;
 use OpenSerializer\Tests\Stub\ResourceDocs;
+use OpenSerializer\Tests\Stub\ScalarUnion;
 use OpenSerializer\Tests\Stub\StringsDocs;
 use OpenSerializer\Tests\Stub\StringsTyped;
 use OpenSerializer\Tests\Stub\UnionDocs;
@@ -288,10 +290,38 @@ final class JsonSerializerTest extends TestCase
         );
 
         self::assertEquals(
+            /** @phpstan-ignore-next-line */
             new UnionDocs(123),
             (new JsonSerializer())->deserialize(
                 UnionDocs::class,
                 JsonObject::fromJsonString('{"stringOrArray": 123}')
+            )
+        );
+    }
+
+    public function test_deserialization_more_complex_union_type_as_mixed(): void
+    {
+        self::assertEquals(
+            new ScalarUnion('string'),
+            (new JsonSerializer())->deserialize(
+                ScalarUnion::class,
+                JsonObject::fromJsonString('{"scalar": "string"}')
+            )
+        );
+
+        self::assertEquals(
+            new ScalarUnion(123),
+            (new JsonSerializer())->deserialize(
+                ScalarUnion::class,
+                JsonObject::fromJsonString('{"scalar": 123}')
+            )
+        );
+
+        self::assertEquals(
+            new ScalarUnion(true),
+            (new JsonSerializer())->deserialize(
+                ScalarUnion::class,
+                JsonObject::fromJsonString('{"scalar": true}')
             )
         );
     }
@@ -377,6 +407,16 @@ final class JsonSerializerTest extends TestCase
         (new JsonSerializer())->deserialize(
             CustomInterface::class,
             JsonObject::fromJsonString('{"greet": "hello"}')
+        );
+    }
+
+    public function test_fails_to_deserialize_user_defined_abstract_class(): void
+    {
+        $this->expectException(LogicException::class);
+
+        (new JsonSerializer())->deserialize(
+            Abstraction::class,
+            JsonObject::fromJsonString('{"name": "black square"}')
         );
     }
 

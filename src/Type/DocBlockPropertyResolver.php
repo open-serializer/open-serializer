@@ -19,6 +19,8 @@ use phpDocumentor\Reflection\Types\String_;
 use phpDocumentor\Reflection\Types\This;
 use ReflectionClass;
 use ReflectionProperty;
+use function array_filter;
+use function array_values;
 use function count;
 use function iterator_to_array;
 
@@ -66,20 +68,14 @@ final class DocBlockPropertyResolver implements PropertyTypeResolver
 
         if ($type instanceof Compound) {
             $types = iterator_to_array($type);
+            $typesExceptNull = array_values(array_filter($types, static fn(Type $t): bool => $t instanceof Null_));
 
-            if (count($types) !== 2) {
+            if (count($typesExceptNull) !== 1) {
                 return TypeInfo::ofMixed();
             }
 
-            if ($types[0] instanceof Null_) {
-                $type = $types[1];
-                $isNullable = true;
-            } else if ($types[1] instanceof Null_) {
-                $type = $types[0];
-                $isNullable = true;
-            } else {
-                return TypeInfo::ofMixed();
-            }
+            $type = $types[0];
+            $isNullable = count($typesExceptNull) !== count($types);
         }
 
         switch (true) {
