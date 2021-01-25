@@ -14,6 +14,14 @@ The core concepts of Open Serializer are:
 * Accept decoded or encoded JSON structures.
 * Be open for extension.
 
+## Installation
+
+Open Serializer works on PHP 7.4/8.0 and is available on Packagist as `open-serializer/open-serializer`. To install it execute:
+
+```shell
+composer require open-serializer/open-serializer
+```
+
 ## Usage
 
 ### Supported types
