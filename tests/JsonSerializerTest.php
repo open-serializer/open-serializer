@@ -2,6 +2,7 @@
 
 namespace OpenSerializer\Tests;
 
+use Countable;
 use DateTimeImmutable;
 use DateTimeZone;
 use LogicException;
@@ -18,6 +19,7 @@ use OpenSerializer\Tests\Stub\BooleansDocs;
 use OpenSerializer\Tests\Stub\BooleansFreak;
 use OpenSerializer\Tests\Stub\BooleansTyped;
 use OpenSerializer\Tests\Stub\ClosureTyped;
+use OpenSerializer\Tests\Stub\CustomInterface;
 use OpenSerializer\Tests\Stub\DatesTyped;
 use OpenSerializer\Tests\Stub\DefaultsTyped;
 use OpenSerializer\Tests\Stub\ExampleDateTimeSerializer;
@@ -34,6 +36,7 @@ use OpenSerializer\Tests\Stub\NotTypedProperty;
 use OpenSerializer\Tests\Stub\ResourceDocs;
 use OpenSerializer\Tests\Stub\StringsDocs;
 use OpenSerializer\Tests\Stub\StringsTyped;
+use OpenSerializer\Tests\Stub\UnionDocs;
 use OpenSerializer\Tests\Stub\UnknownType;
 use PHPUnit\Framework\TestCase;
 use function get_class;
@@ -266,6 +269,33 @@ final class JsonSerializerTest extends TestCase
         );
     }
 
+    public function test_deserialization_union_type_as_mixed(): void
+    {
+        self::assertEquals(
+            new UnionDocs('string'),
+            (new JsonSerializer())->deserialize(
+                UnionDocs::class,
+                JsonObject::fromJsonString('{"stringOrArray": "string"}')
+            )
+        );
+
+        self::assertEquals(
+            new UnionDocs(['string1', 'string2']),
+            (new JsonSerializer())->deserialize(
+                UnionDocs::class,
+                JsonObject::fromJsonString('{"stringOrArray": ["string1","string2"]}')
+            )
+        );
+
+        self::assertEquals(
+            new UnionDocs(123),
+            (new JsonSerializer())->deserialize(
+                UnionDocs::class,
+                JsonObject::fromJsonString('{"stringOrArray": 123}')
+            )
+        );
+    }
+
     public function test_deserialization_of_array_of_unspecified_values(): void
     {
         self::assertEquals(
@@ -328,6 +358,26 @@ final class JsonSerializerTest extends TestCase
 
         /** @phpstan-ignore-next-line */
         (new JsonSerializer())->serialize(new ResourceDocs($res));
+    }
+
+    public function test_fails_to_deserialize_internal_interface(): void
+    {
+        $this->expectException(LogicException::class);
+
+        (new JsonSerializer())->deserialize(
+            Countable::class,
+            JsonObject::fromJsonString('{"count": 12}')
+        );
+    }
+
+    public function test_fails_to_deserialize_user_defined_interface(): void
+    {
+        $this->expectException(LogicException::class);
+
+        (new JsonSerializer())->deserialize(
+            CustomInterface::class,
+            JsonObject::fromJsonString('{"greet": "hello"}')
+        );
     }
 
     public function test_serializing_DateTime_with_custom_serializer(): void
