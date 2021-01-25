@@ -16,6 +16,34 @@ The core concepts of Open Serializer are:
 
 ## Usage
 
+### Supported types
+
+```php
+class Example {
+    private string $typedProperty;
+    
+    /** @var string */
+    private $docblockProperty;
+    
+    private ?self $selfTypedProperty;
+    
+    /** @var Example[] */
+    private array $genericList;
+    
+    /** @var array<Example> */
+    private array $genericArray;
+    
+    /** @var array<int, Example> */
+    private array $genericArrayWithIntKey;
+    
+    /** @var array<string, Example> */
+    private array $genericArrayWithStringKeys;
+    
+    /** @var array<string, array<Example>> */
+    private array $genericArrayOfArrays;
+}
+```
+
 ### Serialize to JsonObject
 
 ```php
@@ -41,4 +69,56 @@ $jsonObject = JsonObject::fromArray(['text' => ['value' => 'example']]);
 
 $serializer = new JsonSerializer();
 $exampleObject = $serializer->deserialize(Example::class, $jsonObject);
+```
+
+### Unsupported types
+
+#### Types that has no valid case for JSON (de)serialization
+
+* `resource`
+* `callable`
+* `Closure`
+* `Generator`
+* ...
+
+#### Internal PHP objects and interfaces (at least by default, see [Extending](#Extending))
+
+* `DateTime`
+* `DateTimeImmutable`
+* ...
+
+## Extending
+
+Sometimes there is a requirement to support internal types, interfaces or implement custom serialization logic.
+It can be done by implementing custom `TypeSerializer` and/or `TypeDeserializer`.
+
+```php
+class Foo {}
+
+/**
+ * @implements TypeSerializer<Foo>
+ * @implements TypeDeserializer<Foo>
+ */
+final class ExampleFooSerializer implements TypeSerializer, TypeDeserializer
+{
+    /**
+     * @param Foo $object
+     */
+    public function serializeObject(object $object): array
+    {
+        // ...serialize Foo to array
+    }
+
+    public function deserializeObject(string $class, array $struct): Foo
+    {
+        // ...deserialize Foo from array
+    }
+}
+
+$fooSerializer = new ExampleFooSerializer();
+$jsonSerializer = new JsonSerializer(
+    new StructSerializer([Foo::class => $fooSerializer]),
+    new StructDeserializer([Foo::class => $fooSerializer])
+);
+
 ```
