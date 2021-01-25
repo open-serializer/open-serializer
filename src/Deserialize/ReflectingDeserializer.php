@@ -119,6 +119,7 @@ final class ReflectingDeserializer implements ObjectDeserializer
         throw new LogicException("Unable to deserialize property");
     }
 
+    /** @param ReflectionClass<object> $class */
     private function assertCanBeCreated(ReflectionClass $class): void
     {
         if (!$class->isUserDefined()) {
