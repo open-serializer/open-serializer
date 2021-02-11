@@ -2,7 +2,10 @@
 
 namespace OpenSerializer;
 
-final class JsonSerializer
+/**
+ * @implements Serializer<JsonObject>
+ */
+final class JsonSerializer implements Serializer
 {
     private ObjectSerializer $serializer;
     private ObjectDeserializer $deserializer;
@@ -21,9 +24,10 @@ final class JsonSerializer
     /**
      * @template T of object
      * @param class-string<T> $class
+     * @param JsonObject $json
      * @return T
      */
-    public function deserialize(string $class, JsonObject $json): object
+    public function deserialize(string $class, SerializedObject $json): object
     {
         return $this->deserializer->deserializeObject($class, $json->decode());
     }
